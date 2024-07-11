@@ -10,8 +10,5 @@ safetensors
 pillow
 einops
 torch
-peft
-xformers
-onnxruntime
-av
 torchvision
+dghs-imgutils

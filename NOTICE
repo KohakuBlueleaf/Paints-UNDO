@@ -1,0 +1,15 @@
+NOTICE
+
+This repository contains files that have been copied or modified from other sources:
+
+1. diffusers_helper/*.py # expect diffusers_helper/attention.py
+   Source: https://github.com/lllyasviel/Paints-UNDO/tree/main/diffusers_helper
+   License: Apache-2.0
+   Modifications: No
+
+2. app.py
+   Source: https://github.com/lllyasviel/Paints-UNDO/tree/main/gradio_app.py
+   License: Apache-2.0
+   Modifications: Modified UI for sketch gen only. Remove vid gen utils. Add clip concat utils.
+
+Please see the individual files for their specific licensing terms.
