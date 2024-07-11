@@ -1,6 +1,6 @@
 # From https://github.com/carolineec/informative-drawings
 # MIT License
-'''
+"""
 MIT License
 
 Copyright (c) 2022 Caroline Chan
@@ -22,7 +22,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
 import os
 import cv2
@@ -41,14 +41,15 @@ class ResidualBlock(nn.Module):
     def __init__(self, in_features):
         super(ResidualBlock, self).__init__()
 
-        conv_block = [  nn.ReflectionPad2d(1),
-                        nn.Conv2d(in_features, in_features, 3),
-                        norm_layer(in_features),
-                        nn.ReLU(inplace=True),
-                        nn.ReflectionPad2d(1),
-                        nn.Conv2d(in_features, in_features, 3),
-                        norm_layer(in_features)
-                        ]
+        conv_block = [
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(in_features, in_features, 3),
+            norm_layer(in_features),
+            nn.ReLU(inplace=True),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(in_features, in_features, 3),
+            norm_layer(in_features),
+        ]
 
         self.conv_block = nn.Sequential(*conv_block)
 
@@ -61,22 +62,26 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
 
         # Initial convolution block
-        model0 = [   nn.ReflectionPad2d(3),
-                    nn.Conv2d(input_nc, 64, 7),
-                    norm_layer(64),
-                    nn.ReLU(inplace=True) ]
+        model0 = [
+            nn.ReflectionPad2d(3),
+            nn.Conv2d(input_nc, 64, 7),
+            norm_layer(64),
+            nn.ReLU(inplace=True),
+        ]
         self.model0 = nn.Sequential(*model0)
 
         # Downsampling
         model1 = []
         in_features = 64
-        out_features = in_features*2
+        out_features = in_features * 2
         for _ in range(2):
-            model1 += [  nn.Conv2d(in_features, out_features, 3, stride=2, padding=1),
-                        norm_layer(out_features),
-                        nn.ReLU(inplace=True) ]
+            model1 += [
+                nn.Conv2d(in_features, out_features, 3, stride=2, padding=1),
+                norm_layer(out_features),
+                nn.ReLU(inplace=True),
+            ]
             in_features = out_features
-            out_features = in_features*2
+            out_features = in_features * 2
         self.model1 = nn.Sequential(*model1)
 
         model2 = []
@@ -87,18 +92,21 @@ class Generator(nn.Module):
 
         # Upsampling
         model3 = []
-        out_features = in_features//2
+        out_features = in_features // 2
         for _ in range(2):
-            model3 += [  nn.ConvTranspose2d(in_features, out_features, 3, stride=2, padding=1, output_padding=1),
-                        norm_layer(out_features),
-                        nn.ReLU(inplace=True) ]
+            model3 += [
+                nn.ConvTranspose2d(
+                    in_features, out_features, 3, stride=2, padding=1, output_padding=1
+                ),
+                norm_layer(out_features),
+                nn.ReLU(inplace=True),
+            ]
             in_features = out_features
-            out_features = in_features//2
+            out_features = in_features // 2
         self.model3 = nn.Sequential(*model3)
 
         # Output layer
-        model4 = [  nn.ReflectionPad2d(3),
-                        nn.Conv2d(64, output_nc, 7)]
+        model4 = [nn.ReflectionPad2d(3), nn.Conv2d(64, output_nc, 7)]
         if sigmoid:
             model4 += [nn.Sigmoid()]
 
@@ -116,16 +124,18 @@ class Generator(nn.Module):
 
 class LineartDetector:
     def __init__(self, model_path="hf_download"):
-        self.model = self.load_model('sk_model.pth', model_path)
-        self.model_coarse = self.load_model('sk_model2.pth', model_path)
+        self.model = self.load_model("sk_model.pth", model_path)
+        self.model_coarse = self.load_model("sk_model2.pth", model_path)
 
     def load_model(self, name, model_path="hf_download"):
-        remote_model_path = "https://huggingface.co/lllyasviel/Annotators/resolve/main/" + name
+        remote_model_path = (
+            "https://huggingface.co/lllyasviel/Annotators/resolve/main/" + name
+        )
         modelpath = os.path.join(model_path, name)
         if not os.path.exists(modelpath):
             load_file_from_url(remote_model_path, model_dir=model_path)
         model = Generator(3, 1, 3)
-        model.load_state_dict(torch.load(modelpath, map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load(modelpath, map_location=torch.device("cpu")))
         model.eval()
         model = model.cuda()
         return model
@@ -137,7 +147,7 @@ class LineartDetector:
         with torch.no_grad():
             image = torch.from_numpy(image).float().cuda()
             image = image / 255.0
-            image = rearrange(image, 'h w c -> 1 c h w')
+            image = rearrange(image, "h w c -> 1 c h w")
             line = model(image)[0][0]
 
             line = line.cpu().numpy()

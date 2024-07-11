@@ -29,7 +29,9 @@ def load_file_from_url(
     return cached_file
 
 
-def combine_linearts(lineart1: np.ndarray, lineart2: np.ndarray, erode=[False, False]) -> np.ndarray:
+def combine_linearts(
+    lineart1: np.ndarray, lineart2: np.ndarray, erode=[False, False]
+) -> np.ndarray:
     if erode[0]:
         lineart1 = cv2.erode(lineart1, np.ones((3, 3), np.uint8))
     if erode[1]:

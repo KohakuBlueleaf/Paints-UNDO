@@ -1,6 +1,7 @@
-'''
+"""
 Modified from https://github.com/lllyasviel/Paints-UNDO/blob/main/gradio_app.py
-'''
+"""
+
 import functools
 
 import gradio as gr
@@ -157,7 +158,13 @@ def encode_cropped_prompt(txt: str, max_length=150):
     ).input_ids.to(device=text_encoder.device)
     if max_length + 2 > tokenizer.model_max_length:
         input_ids = cond_ids.squeeze(0)
-        id_list = list(range(1, max_length + 2 - tokenizer.model_max_length + 2, tokenizer.model_max_length - 2))
+        id_list = list(
+            range(
+                1,
+                max_length + 2 - tokenizer.model_max_length + 2,
+                tokenizer.model_max_length - 2,
+            )
+        )
         text_cond_list = []
         for i in id_list:
             ids_chunk = (
@@ -167,16 +174,16 @@ def encode_cropped_prompt(txt: str, max_length=150):
             )
             if torch.all(ids_chunk[1] == tokenizer.pad_token_id):
                 break
-            text_cond = text_encoder(torch.concat(ids_chunk).unsqueeze(0)).last_hidden_state
+            text_cond = text_encoder(
+                torch.concat(ids_chunk).unsqueeze(0)
+            ).last_hidden_state
             if text_cond_list == []:
                 text_cond_list.append(text_cond[:, :1])
-            text_cond_list.append(text_cond[:, 1:tokenizer.model_max_length - 1])
+            text_cond_list.append(text_cond[:, 1 : tokenizer.model_max_length - 1])
         text_cond_list.append(text_cond[:, -1:])
         text_cond = torch.concat(text_cond_list, dim=1)
     else:
-        text_cond = text_encoder(
-            cond_ids, attention_mask=None
-        ).last_hidden_state
+        text_cond = text_encoder(cond_ids, attention_mask=None).last_hidden_state
     return text_cond.flatten(0, 1).unsqueeze(0)
 
 

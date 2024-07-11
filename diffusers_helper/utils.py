@@ -11,20 +11,20 @@ import safetensors.torch as sf
 
 def write_to_json(data, file_path):
     temp_file_path = file_path + ".tmp"
-    with open(temp_file_path, 'wt', encoding='utf-8') as temp_file:
+    with open(temp_file_path, "wt", encoding="utf-8") as temp_file:
         json.dump(data, temp_file, indent=4)
     os.replace(temp_file_path, file_path)
     return
 
 
 def read_from_json(file_path):
-    with open(file_path, 'rt', encoding='utf-8') as file:
+    with open(file_path, "rt", encoding="utf-8") as file:
         data = json.load(file)
     return data
 
 
 def get_active_parameters(m):
-    return {k:v for k, v in m.named_parameters() if v.requires_grad}
+    return {k: v for k, v in m.named_parameters() if v.requires_grad}
 
 
 def cast_training_params(m, dtype=torch.float32):
@@ -63,8 +63,8 @@ def zero_module(module):
     return module
 
 
-def load_last_state(model, folder='accelerator_output'):
-    file_pattern = os.path.join(folder, '**', 'model.safetensors')
+def load_last_state(model, folder="accelerator_output"):
+    file_pattern = os.path.join(folder, "**", "model.safetensors")
     files = glob.glob(file_pattern, recursive=True)
 
     if not files:
@@ -85,9 +85,9 @@ def load_last_state(model, folder='accelerator_output'):
 
 
 def generate_random_prompt_from_tags(tags_str, min_length=3, max_length=32):
-    tags = tags_str.split(', ')
+    tags = tags_str.split(", ")
     tags = random.sample(tags, k=min(random.randint(min_length, max_length), len(tags)))
-    prompt = ', '.join(tags)
+    prompt = ", ".join(tags)
     return prompt
 
 
@@ -100,19 +100,27 @@ def save_bcthw_as_mp4(x, output_filename, fps=10):
             per_row = p
             break
 
-    os.makedirs(os.path.dirname(os.path.abspath(os.path.realpath(output_filename))), exist_ok=True)
-    x = torch.clamp(x.float(), -1., 1.) * 127.5 + 127.5
+    os.makedirs(
+        os.path.dirname(os.path.abspath(os.path.realpath(output_filename))),
+        exist_ok=True,
+    )
+    x = torch.clamp(x.float(), -1.0, 1.0) * 127.5 + 127.5
     x = x.detach().cpu().to(torch.uint8)
-    x = einops.rearrange(x, '(m n) c t h w -> t (m h) (n w) c', n=per_row)
-    torchvision.io.write_video(output_filename, x, fps=fps, video_codec='h264', options={'crf': '0'})
+    x = einops.rearrange(x, "(m n) c t h w -> t (m h) (n w) c", n=per_row)
+    torchvision.io.write_video(
+        output_filename, x, fps=fps, video_codec="h264", options={"crf": "0"}
+    )
     return x
 
 
 def save_bcthw_as_png(x, output_filename):
-    os.makedirs(os.path.dirname(os.path.abspath(os.path.realpath(output_filename))), exist_ok=True)
-    x = torch.clamp(x.float(), -1., 1.) * 127.5 + 127.5
+    os.makedirs(
+        os.path.dirname(os.path.abspath(os.path.realpath(output_filename))),
+        exist_ok=True,
+    )
+    x = torch.clamp(x.float(), -1.0, 1.0) * 127.5 + 127.5
     x = x.detach().cpu().to(torch.uint8)
-    x = einops.rearrange(x, 'b c t h w -> c (b h) (t w)')
+    x = einops.rearrange(x, "b c t h w -> c (b h) (t w)")
     torchvision.io.write_png(x, output_filename)
     return output_filename
 

@@ -1,6 +1,6 @@
 # Anime2sketch
 # https://github.com/Mukosame/Anime2Sketch
-'''
+"""
 MIT License
 
 Copyright (c) 2022 Caroline Chan
@@ -22,7 +22,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
 import numpy as np
 import torch

@@ -21,12 +21,16 @@ def unet_add_coded_conds(unet, added_number_count=1):
     unet_original_forward = unet.forward
 
     def hooked_unet_forward(sample, timestep, encoder_hidden_states, **kwargs):
-        cross_attention_kwargs = {k: v for k, v in kwargs['cross_attention_kwargs'].items()}
-        coded_conds = cross_attention_kwargs.pop('coded_conds')
-        kwargs['cross_attention_kwargs'] = cross_attention_kwargs
+        cross_attention_kwargs = {
+            k: v for k, v in kwargs["cross_attention_kwargs"].items()
+        }
+        coded_conds = cross_attention_kwargs.pop("coded_conds")
+        kwargs["cross_attention_kwargs"] = cross_attention_kwargs
 
-        coded_conds = torch.cat([coded_conds] * (sample.shape[0] // coded_conds.shape[0]), dim=0).to(sample.device)
-        kwargs['added_cond_kwargs'] = dict(coded_conds=coded_conds)
+        coded_conds = torch.cat(
+            [coded_conds] * (sample.shape[0] // coded_conds.shape[0]), dim=0
+        ).to(sample.device)
+        kwargs["added_cond_kwargs"] = dict(coded_conds=coded_conds)
         return unet_original_forward(sample, timestep, encoder_hidden_states, **kwargs)
 
     unet.forward = hooked_unet_forward
