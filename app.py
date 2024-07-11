@@ -208,7 +208,9 @@ def numpy2pytorch(imgs):
 @torch.inference_mode()
 def interrogator_process(x):
     img = Image.fromarray(x)
-    rating, features, chars = get_wd14_tags(img, no_underline=True)
+    rating, features, chars = get_wd14_tags(
+        img, general_threshold=0.3, character_threshold=0.75, no_underline=True
+    )
     result = ""
     for char in chars:
         result += char
@@ -217,7 +219,7 @@ def interrogator_process(x):
         result += feature
         result += ", "
     result += max(rating, key=rating.get)
-    return result
+    return result, f'{len(tokenizer.tokenize(result))}'
 
 
 @torch.inference_mode()
@@ -317,39 +319,39 @@ with block:
                 sources=["upload"], type="numpy", label="Image", height=384
             )
             with gr.Row():
-                with gr.Column(scale=2, variant="compact"):
+                with gr.Column(scale=5):
                     prompt = gr.Textbox(label="Output Prompt", interactive=True)
-                with gr.Column(scale=1, variant="compact", min_width=160):
                     n_prompt = gr.Textbox(
                         label="Negative Prompt",
                         value="lowres, worst quality, bad anatomy, bad hands, text, extra digit, fewer digits, cropped, low quality, jpeg artifacts, signature, watermark, username",
                     )
-            with gr.Row():
-                input_undo_steps = gr.Dropdown(
-                    label="Operation Steps",
-                    value=[850, 875, 900, 925, 950, 975],
-                    choices=list(range(0, 1000, 5)),
-                    multiselect=True,
-                )
-                num_sets = gr.Slider(
-                    label="Num Sets", minimum=1, maximum=10, value=4, step=1
-                )
-            with gr.Row():
-                seed = gr.Slider(
-                    label="Seed", minimum=0, maximum=50000, step=1, value=37462
-                )
-                image_width = gr.Slider(
-                    label="Target size", minimum=512, maximum=1024, value=768, step=32
-                )
-                steps = gr.Slider(
-                    label="Steps", minimum=1, maximum=32, value=16, step=1
-                )
-                cfg = gr.Slider(
-                    label="CFG Scale", minimum=1.0, maximum=16, value=5, step=0.05
-                )
-            key_gen_button = gr.Button(value="Generate Sketch", interactive=False)
+                    input_undo_steps = gr.Dropdown(
+                        label="Operation Steps",
+                        value=[900, 925, 950, 975],
+                        choices=list(range(0, 1000, 5)),
+                        multiselect=True,
+                    )
+                    num_sets = gr.Slider(
+                        label="Num Sets", minimum=1, maximum=10, value=3, step=1
+                    )
+                with gr.Column(scale=2, min_width=160):
+                    token_counter = gr.Textbox(label="Tokens Count", lines=1, interactive=False)
+                    recaption_button = gr.Button(value="Tagging", interactive=True)
+                    seed = gr.Slider(
+                        label="Seed", minimum=0, maximum=50000, step=1, value=37462
+                    )
+                    image_width = gr.Slider(
+                        label="Target size", minimum=512, maximum=1024, value=768, step=32
+                    )
+                    steps = gr.Slider(
+                        label="Steps", minimum=1, maximum=32, value=16, step=1
+                    )
+                    cfg = gr.Slider(
+                        label="CFG Scale", minimum=1.0, maximum=16, value=5, step=0.05
+                    )
 
         with gr.Column():
+            key_gen_button = gr.Button(value="Generate Sketch", interactive=False)
             gr.Markdown("#### Sketch Outputs")
             result_gallery = gr.Gallery(
                 height=384, object_fit="contain", label="Sketch Outputs", columns=4
@@ -363,11 +365,19 @@ with block:
 
     input_fg.change(
         lambda x: [
-            interrogator_process(x) if x is not None else "",
+            *(interrogator_process(x) if x is not None else ("", "")),
             gr.update(interactive=True),
         ],
         inputs=[input_fg],
-        outputs=[prompt, key_gen_button],
+        outputs=[prompt, token_counter, key_gen_button],
+    )
+    recaption_button.click(
+        lambda x: [
+            *(interrogator_process(x) if x is not None else ("", "")),
+            gr.update(interactive=True),
+        ],
+        inputs=[input_fg],
+        outputs=[prompt, token_counter, key_gen_button],
     )
 
     key_gen_button.click(
