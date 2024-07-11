@@ -10,8 +10,10 @@ SketchGen: An Image-to-Sketch tools for making synthetic dataset or generating r
 * Built upon PaintsUndo.
 
 ### Examples:
-![1720706273112](image/README/1720706273112.png)
-![1720708315639](image/README/1720708315639.png)
+![1720725916946](image/README/1720725916946.png)
+|![1720725482289](image/README/1720725482289.png)|![1720725782453](image/README/1720725782453.png)|
+|-|-|
+|![1720726085993](image/README/1720726085993.png)|![1720727045132](image/README/1720727045132.png)|
 
 ## Get Started
 

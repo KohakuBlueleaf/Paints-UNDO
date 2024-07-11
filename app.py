@@ -219,7 +219,7 @@ def interrogator_process(x):
         result += feature
         result += ", "
     result += max(rating, key=rating.get)
-    return result, f'{len(tokenizer.tokenize(result))}'
+    return result, f"{len(tokenizer.tokenize(result))}"
 
 
 @torch.inference_mode()
@@ -235,7 +235,7 @@ def process(
     num_sets,
     progress=gr.Progress(),
 ):
-    lineart_fg = input_fg
+    lineart_fg = resize_and_center_crop(input_fg, 1280)
     linearts = []
     for model in lineart_models:
         linearts.append(model(lineart_fg))
@@ -335,13 +335,19 @@ with block:
                         label="Num Sets", minimum=1, maximum=10, value=3, step=1
                     )
                 with gr.Column(scale=2, min_width=160):
-                    token_counter = gr.Textbox(label="Tokens Count", lines=1, interactive=False)
+                    token_counter = gr.Textbox(
+                        label="Tokens Count", lines=1, interactive=False
+                    )
                     recaption_button = gr.Button(value="Tagging", interactive=True)
                     seed = gr.Slider(
                         label="Seed", minimum=0, maximum=50000, step=1, value=37462
                     )
                     image_width = gr.Slider(
-                        label="Target size", minimum=512, maximum=1024, value=768, step=32
+                        label="Target size",
+                        minimum=512,
+                        maximum=1024,
+                        value=768,
+                        step=32,
                     )
                     steps = gr.Slider(
                         label="Steps", minimum=1, maximum=32, value=16, step=1
@@ -378,6 +384,9 @@ with block:
         ],
         inputs=[input_fg],
         outputs=[prompt, token_counter, key_gen_button],
+    )
+    prompt.change(
+        lambda x: len(tokenizer.tokenize(x)), inputs=[prompt], outputs=[token_counter]
     )
 
     key_gen_button.click(
