@@ -147,7 +147,7 @@ def encode_cropped_prompt_77tokens(txt: str):
 
 
 @torch.inference_mode()
-def encode_cropped_prompt(txt: str, max_length=225):
+def encode_cropped_prompt(txt: str, max_length=150):
     cond_ids = tokenizer(
         txt,
         padding="max_length",
@@ -201,7 +201,7 @@ def numpy2pytorch(imgs):
 @torch.inference_mode()
 def interrogator_process(x):
     img = Image.fromarray(x)
-    rating, features, chars = get_wd14_tags(img, general_threshold=0.25, no_underline=True)
+    rating, features, chars = get_wd14_tags(img, no_underline=True)
     result = ""
     for char in chars:
         result += char
@@ -321,7 +321,7 @@ with block:
                 input_undo_steps = gr.Dropdown(
                     label="Operation Steps",
                     value=[850, 875, 900, 925, 950, 975],
-                    choices=list(range(0, 1000, 25)),
+                    choices=list(range(0, 1000, 5)),
                     multiselect=True,
                 )
                 num_sets = gr.Slider(
